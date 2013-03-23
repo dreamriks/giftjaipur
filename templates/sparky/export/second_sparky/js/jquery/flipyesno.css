@@ -1,0 +1,16 @@
+.cb-bg
+{
+width: 84px;
+height: 26px;
+background-image: url(images/cb-bg.gif);
+background-repeat:no-repeat;
+}
+
+.cb-slider
+{
+width: 39px;
+height: 26px;
+background-image: url(images/cb-slider.png);
+cursor: pointer;
+position: relative;
+}
