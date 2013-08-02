@@ -2,12 +2,12 @@
 <!DOCTYPE install SYSTEM "http://www.joomla.org/xml/dtd/1.5/module-install.dtd">
 <install type="module" version="1.5.0">
     <name>mod_virtuemart_category</name>
-    <creationDate>November 13 2012</creationDate>
+    <creationDate>July 15 2013</creationDate>
     <author>The VirtueMart Development Team</author>
     <authorUrl>http://www.virtuemart.net</authorUrl>
-    <copyright>Copyright (C) 2004-2012 Virtuemart Team. All rights reserved.</copyright>
+   <copyright>${PHING.VM.COPYRIGH}</copyright>
     <license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
-    <version>2.0.14</version>
+    <version>2.0.22a</version>
     <description>MOD_VIRTUEMART_CATEGORY_DESC</description>
     <files>
 	<filename module="mod_virtuemart_category">mod_virtuemart_category.php</filename>

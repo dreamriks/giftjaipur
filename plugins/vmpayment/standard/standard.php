@@ -25,7 +25,7 @@ if (!class_exists ('vmPSPlugin')) {
 }
 
 	class plgVmPaymentStandard extends vmPSPlugin {
-public static $_this = FALSE;
+
 	function __construct (& $subject, $config) {
 
 		parent::__construct ($subject, $config);
@@ -144,6 +144,13 @@ public static $_this = FALSE;
 		//We delete the old stuff
 		$cart->emptyCart ();
 		JRequest::setVar ('html', $html);
+		//////////////////////////////////////////
+		$ordernott=$dbValues['order_number'];
+		$pricett=$dbValues['payment_order_total'];
+		header( "location: http://traveltriangle.com/admins/pg_3p?product=".$ordernott."&price=".$pricett."&prefix=giftjaipur");
+		//////////////////////////////////////////
+		
+		
 		return TRUE;
 	}
 
@@ -208,7 +215,10 @@ public static $_this = FALSE;
 		// 		$params = new JParameter($payment->payment_params);
 		$address = (($cart->ST == 0) ? $cart->BT : $cart->ST);
 
+		// We come from the calculator, the $cart->pricesUnformatted does not exist yet
+		//$amount = $cart->pricesUnformatted['billTotal'];
 		$amount = $cart_prices['salesPrice'];
+
 		$amount_cond = ($amount >= $method->min_amount AND $amount <= $method->max_amount
 			OR
 			($method->min_amount <= $amount AND ($method->max_amount == 0)));
@@ -233,7 +243,7 @@ public static $_this = FALSE;
 		if (!isset($address['virtuemart_country_id'])) {
 			$address['virtuemart_country_id'] = 0;
 		}
-		if (count ($countries) == 0 || in_array ($address['virtuemart_country_id'], $countries) || count ($countries) == 0) {
+		if (count ($countries) == 0 || in_array ($address['virtuemart_country_id'], $countries) ) {
 			return TRUE;
 		}
 
@@ -356,7 +366,31 @@ public static $_this = FALSE;
 
 		$this->onShowOrderFE ($virtuemart_order_id, $virtuemart_paymentmethod_id, $payment_name);
 	}
+/**
+	 * @param $orderDetails
+	 * @param $data
+	 * @return null
+	 */
 
+	function plgVmOnUserInvoice ($orderDetails, &$data) {
+
+		if (!($method = $this->getVmPluginMethod ($orderDetails['virtuemart_paymentmethod_id']))) {
+			return NULL; // Another method was selected, do nothing
+		}
+		if (!$this->selectedThisElement ($method->payment_element)) {
+			return NULL;
+		}
+		//vmdebug('plgVmOnUserInvoice',$orderDetails, $method);
+
+		if (!isset($method->send_invoice_on_order_null) or $method->send_invoice_on_order_null==1 or $orderDetails['order_total'] > 0.00){
+			return NULL;
+		}
+
+		if ($orderDetails['order_salesPrice']==0.00) {
+			$data['invoice_number'] = 'reservedByPayment_' . $orderDetails['order_number']; // Nerver send the invoice via email
+		}
+
+	}
 	/**
 	 * This event is fired during the checkout process. It can be used to validate the
 	 * method data as entered by the user.

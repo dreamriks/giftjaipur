@@ -47,6 +47,9 @@ class VirtuemartViewShopperGroup extends VmView {
 		$this->assignRef('task', $task);
 
 		if ($layoutName == 'edit') {
+			//For shoppergroup specific price display
+			VmConfig::loadJLang('com_virtuemart_config');
+
 			$shoppergroup = $model->getShopperGroup();
 			$this->SetViewTitle('SHOPPERGROUP',$shoppergroup->shopper_group_name);
 
@@ -65,7 +68,7 @@ class VirtuemartViewShopperGroup extends VmView {
 			JToolBarHelper::makeDefault();
 
 
-			$this->loadHelper('permissions');
+			if(!class_exists('Permissions')) require(JPATH_VM_ADMINISTRATOR.DS.'helpers'.DS.'permissions.php');
 			$showVendors = Permissions::getInstance()->check('admin');
 			$this->assignRef('showVendors',$showVendors);
 

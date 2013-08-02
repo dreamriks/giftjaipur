@@ -17,7 +17,7 @@
 
 body
 {
-  background: #e0dedf  url(../images/personal/bg2.png) repeat-x;
+  background: #ccc;
   color: #333;
   font-family: arial, helvetica, sans-serif;
 }
@@ -42,7 +42,7 @@ a:visited
 }
 
 a:hover,
-a:active,
+<!--a:active,
 a:focus
 {
   background:#095197;
@@ -147,13 +147,13 @@ h1#logo
    top:5em;
 
   padding: 0px 0px 0px 0 ;
-  background:#e0e0e0  url(../images/personal/ecke.gif) top left repeat-x ;
+  background:none;
   border:0 ;
   text-align:left;
   left:230px;
    display:block;
    margin:0px 10px 0 10px;
-   border-top:solid 1px #ddd;
+   
 
 }
 #fontsize1
@@ -1011,9 +1011,9 @@ button.button,
 button.validate
 {
 
-  background:#FFFFFF url(../images/nature/arrow1.gif) no-repeat left top;
+  background:#FFFFFF url("../images/vmgeneral/backgrounds.png") repeat-x scroll 0px -160px rgb(232, 232, 232);
   border:1px solid #DDDDDD;
-  color:#444444;
+  color:#fff;
 }
 
 /* ++++++++++++++  tabs/ slide  ++++++++++++++ */

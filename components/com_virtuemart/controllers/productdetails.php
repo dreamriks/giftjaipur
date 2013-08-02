@@ -226,8 +226,9 @@ class VirtueMartControllerProductdetails extends JController {
 		$view->display ();
 	}
 
-	/* Add or edit a review
-	 TODO  control and update in database the review */
+	/**
+	 * Add or edit a review
+	 */
 	public function review () {
 
 		$data = JRequest::get ('post');
@@ -242,7 +243,7 @@ class VirtueMartControllerProductdetails extends JController {
 			$msg = ($error) . '<br />';
 		}
 
-		$this->setRedirect (JRoute::_ ('index.php?option=com_virtuemart&view=productdetails&virtuemart_product_id=' . (int)$data['virtuemart_product_id']), $msg);
+		$this->setRedirect (JRoute::_ ('index.php?option=com_virtuemart&view=productdetails&virtuemart_product_id=' . (int)$data['virtuemart_product_id'], FALSE), $msg);
 
 	}
 
@@ -309,7 +310,11 @@ class VirtueMartControllerProductdetails extends JController {
 
 		// Get the document object.
 		$document = JFactory::getDocument ();
-		$document->setName ('recalculate');
+		// stAn: setName works in JDocumentHTML and not JDocumentRAW
+		if (method_exists($document, 'setName')){
+			$document->setName ('recalculate');
+		}
+
 		JResponse::setHeader ('Cache-Control', 'no-cache, must-revalidate');
 		JResponse::setHeader ('Expires', 'Mon, 6 Jul 2000 10:00:00 GMT');
 		// Set the MIME type for JSON output.
@@ -343,10 +348,10 @@ class VirtueMartControllerProductdetails extends JController {
 			foreach ($errors as $error) {
 				$msg = ($error) . '<br />';
 			}
-			$this->setRedirect (JRoute::_ ('index.php?option=com_virtuemart&view=productdetails&layout=notify&virtuemart_product_id=' . $data['virtuemart_product_id']), $msg);
+			$this->setRedirect (JRoute::_ ('index.php?option=com_virtuemart&view=productdetails&layout=notify&virtuemart_product_id=' . $data['virtuemart_product_id'], FALSE), $msg);
 		} else {
 			$msg = JText::sprintf ('COM_VIRTUEMART_STRING_SAVED', JText::_ ('COM_VIRTUEMART_CART_NOTIFY'));
-			$this->setRedirect (JRoute::_ ('index.php?option=com_virtuemart&view=productdetails&virtuemart_product_id=' . $data['virtuemart_product_id']), $msg);
+			$this->setRedirect (JRoute::_ ('index.php?option=com_virtuemart&view=productdetails&virtuemart_product_id=' . $data['virtuemart_product_id'], FALSE), $msg);
 		}
 
 	}

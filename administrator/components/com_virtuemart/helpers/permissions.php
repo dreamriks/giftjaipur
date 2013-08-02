@@ -281,8 +281,6 @@ class Permissions extends JObject{
 			if($this->check('admin,storeadmin') ){
 				$this->_vendorId = 1;
 				return $this->_vendorId;
-			} else {
-				return false;
 			}
 		}
 		return false;
@@ -488,19 +486,6 @@ class Permissions extends JObject{
 
 		ksort($list);
 		return $list;
-	}
-
-	/**
-	* Check if the price should be shown including tax
-	*
-	* @author RolandD
-	* @todo Figure out where to get the setting from
-	* @access public
-	* @param
-	* @return bool true if price with tax is shown otherwise false
-	*/
-	public function showPriceIncludingTax() {
-		return true;
 	}
 }
 

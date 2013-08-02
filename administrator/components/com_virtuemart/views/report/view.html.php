@@ -33,24 +33,29 @@ class VirtuemartViewReport extends VmView {
 	 */
 	function display($tpl = null){
 
-		// Load the helper(s)
+		if (!class_exists('VmHTML'))
+			require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'html.php');
+		if (!class_exists('CurrencyDisplay'))
+			require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'currencydisplay.php');
 
-		$this->loadHelper('html');
-
-		$this->loadHelper('html');
-		$this->loadHelper('currencydisplay');
-		$this->loadHelper('reportFunctions');
 
 		$model		= VmModel::getModel();
-		// $config		= JFactory::getConfig();
-		// $tzoffset	= $config->getValue('config.offset');
+
 		JRequest::setvar('task','');
-		// set period
-		//$date_presets = $model->getDatePresets();
 
 		$this->SetViewTitle('REPORT');
 
 		$myCurrencyDisplay = CurrencyDisplay::getInstance();
+
+		//update order items button
+		$q = 'SELECT * FROM #__virtuemart_order_items WHERE `product_discountedPriceWithoutTax` IS NULL ';
+		$db = JFactory::getDBO();
+		$db->setQuery($q);
+		$res = $db->loadRow();
+		if($res) {
+			JToolBarHelper::customX('updateOrderItems', 'new', 'new', JText::_('COM_VIRTUEMART_REPORT_UPDATEORDERITEMS'),false);
+			vmError('COM_VIRTUEMART_REPORT_UPDATEORDERITEMS_WARN');
+		}
 
 		$this->addStandardDefaultViewLists($model);
 		$revenueBasic = $model->getRevenue();
@@ -92,9 +97,10 @@ class VirtuemartViewReport extends VmView {
 		// $productList = $model->getOrderItems();
 		// $this->assignRef('productList', $productList);
 
-
+		$orderstatusM =VmModel::getModel('orderstatus');
 		$this->lists['select_date'] = $model->renderDateSelectList();
-		$this->lists['state_list'] = $model->renderOrderstatesList();
+		$orderstates = JRequest::getVar ('order_status_code', array('C','S'));
+		$this->lists['state_list'] = $orderstatusM->renderOSList($orderstates,'order_status_code',TRUE);
 		$this->lists['intervals'] = $model->renderIntervalsList();
 		$this->assignRef('from_period', $model->from_period);
 		$this->assignRef('until_period', $model->until_period);

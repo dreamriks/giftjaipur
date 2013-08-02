@@ -275,3 +275,33 @@ list-style-type:none;
 float:left;
 font-size:70%;
 }
+
+a.showcart {
+background: url("../images/vmgeneral/backgrounds.png") repeat-x scroll 0px -160px rgb(232, 232, 232);
+border: 1px solid rgb(0, 160, 0);
+border-radius: 4px 4px 4px 4px;
+font-size: 14px;
+cursor: pointer;
+height: 20px;
+text-align: center;
+letter-spacing: 1px;
+padding: 3px 4px;
+min-width: 30px
+ width:auto;
+color: #ffffff;
+}
+
+a.continue {
+background: url("../images/vmgeneral/backgrounds.png") repeat-x scroll 0px -160px rgb(232, 232, 232);
+border: 1px solid rgb(0, 160, 0);
+border-radius: 4px 4px 4px 4px;
+font-size: 14px;
+cursor: pointer;
+height: 20px;
+text-align: center;
+letter-spacing: 1px;
+padding: 3px 4px;
+min-width: 30px
+ width:auto;
+color: #ffffff;
+}

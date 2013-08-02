@@ -271,7 +271,7 @@
 
             jQuery("#admin-ui-tabs").delegate("div.vmicon-16-remove", "click", function () {
                 jQuery(this).closest(".vm_thumb_image").fadeOut("500", function () {
-                    jQuery(this).remove()
+                    jQuery(this).remove();
                 });
             });
             jQuery("#admin-ui-tabs").delegate("span.vmicon-16-remove", "click", function () {
@@ -300,6 +300,8 @@
                             jQuery("#vm_display_image").attr("src", datas.file_root + datas.file_url);
                             jQuery("#vm_display_image").attr("alt", datas.file_title);
                             jQuery("#file_title").html(datas.file_title);
+							var lang = datas.file_lang.split(',');
+							jQuery("#vmlangimg").val(lang).trigger("liszt:updated");
                             if (datas.published == 1) jQuery("#adminForm [name=media_published]").attr('checked', true);
                             else jQuery("#adminForm [name=media_published]").attr('checked', false);
                             if (datas.file_is_downloadable == 0) {

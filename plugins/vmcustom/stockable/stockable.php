@@ -24,11 +24,9 @@ if (!class_exists('vmCustomPlugin')) require(JPATH_VM_PLUGINS . DS . 'vmcustompl
 class plgVmCustomStockable extends vmCustomPlugin {
 
 	private $stockhandle = 0;
-	// instance of class
-// 	public static $_this = false;
 
 	function __construct(& $subject, $config) {
-// 		if(self::$_this) return self::$_this;
+
 		parent::__construct($subject, $config);
 
 		$varsToPush = array(
@@ -38,7 +36,6 @@ class plgVmCustomStockable extends vmCustomPlugin {
 
 		$this->setConfigParameterable('custom_params',$varsToPush);
 
-// 		self::$_this = $this;
 	}
 
 	// function plgVmOnOrder($product) {
@@ -397,6 +394,9 @@ class plgVmCustomStockable extends vmCustomPlugin {
 					$(".addtocart-bar").append(\'<a href="ind\'+\'ex.php?option=com_virtuemart&view=productdetails&layout=notify&virtuemart_product_id=\' + found_id + \'" class="notify">' . JText::_('COM_VIRTUEMART_CART_NOTIFY') . '</a>\');
 				} else {
 					var quantity = $(".addtocart-bar .quantity-input").val();
+					if (isNaN(quantity)) {
+					    quantity = 1;
+					}
 					$(".addtocart-bar>span").remove();
 					$(".addtocart-bar>div").remove();
 					$(".addtocart-bar>a.notify").remove();
@@ -560,6 +560,9 @@ class plgVmCustomStockable extends vmCustomPlugin {
 	 * @author Matt Lewis-Garner
 	 */
 	function getValideChild($child_id ) {
+
+		//$productModel = VmModel::getModel('product');
+		//$child = $productModel->getProduct($child_id,true,false,true,1,false);
 		$db = JFactory::getDBO();
 		$q = 'SELECT `product_sku`,`product_name`,`product_in_stock`,`product_ordered`,`product_availability` FROM `#__virtuemart_products` JOIN `#__virtuemart_products_'.VMLANG.'` as l using (`virtuemart_product_id`) WHERE `published`=1 and `virtuemart_product_id` ='.(int)$child_id ;
 		$db->setQuery($q);
@@ -608,7 +611,7 @@ class plgVmCustomStockable extends vmCustomPlugin {
 		return $this->onDisplayEditBECustom($virtuemart_custom_id,$customPlugin);
 	}
 
-	public function plgVmCalculateCustomVariant(&$product, &$productCustomsPrice,$selected){
+	public function plgVmCalculateCustomVariant($product, &$productCustomsPrice,$selected){
 
 		if ($productCustomsPrice->custom_element != $this->_name) return false;
 
@@ -621,6 +624,7 @@ class plgVmCustomStockable extends vmCustomPlugin {
 		if ($child = $this->getValideChild($selected)) {
 			if ($param['child'][$selected]['custom_price'] !=='') {
 				$productCustomsPrice->custom_price = (float)$param['child'][$selected]['custom_price'];
+
 			} else {
 				$db = JFactory::getDBO();
 				$db->setQuery('SELECT `product_price` FROM `#__virtuemart_product_prices`  WHERE `virtuemart_product_id`="' . (int)$selected . '" ');

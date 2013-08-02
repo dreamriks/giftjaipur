@@ -41,7 +41,7 @@ class VmView extends JView{
 	 * set all commands and options for BE default.php views
 	* return $list filter_order and
 	*/
-	function addStandardDefaultViewCommands($showNew=true, $showDelete=true) {
+	function addStandardDefaultViewCommands($showNew=true, $showDelete=true, $showHelp=true) {
 
 		JToolBarHelper::divider();
 		JToolBarHelper::publishList();
@@ -53,6 +53,7 @@ class VmView extends JView{
 		if ($showDelete) {
 			JToolBarHelper::deleteList();
 		}
+		self::showHelp ( $showHelp);
 	}
 
 	/*
@@ -120,12 +121,14 @@ class VmView extends JView{
 		JToolBarHelper::save();
 		JToolBarHelper::apply();
 		JToolBarHelper::cancel();
+		self::showHelp();
 		}
 		// javascript for cookies setting in case of press "APPLY"
 		$document = JFactory::getDocument();
 
 		if (JVM_VERSION===1) {
 			$j = "
+//<![CDATA[
 	function submitbutton(pressbutton) {
 
 		jQuery( '#media-dialog' ).remove();
@@ -137,9 +140,12 @@ class VmView extends JView{
 			jQuery.cookie('vmapply', '0', options);
 		}
 		 submitform(pressbutton);
-	};" ;
+	};
+//]]>
+	" ;
 		}
 		else $j = "
+//<![CDATA[
 	Joomla.submitbutton=function(a){
 		var options = { path: '/', expires: 2}
 		if (a == 'apply') {
@@ -150,7 +156,9 @@ class VmView extends JView{
 		}
 		jQuery( '#media-dialog' ).remove();
 		Joomla.submitform(a);
-	};" ;
+	};
+//]]>
+	" ;
 		$document->addScriptDeclaration ( $j);
 
 		// LANGUAGE setting
@@ -178,8 +186,6 @@ class VmView extends JView{
 			$langList = JHTML::_('select.genericlist',  $languages, 'vmlang', 'class="inputbox"', 'value', 'text', $selectedLangue , 'vmlang');
 			$this->assignRef('langList',$langList);
 			$this->assignRef('lang',$lang);
-
-
 
 			$token = JUtility::getToken();
 			$j = '
@@ -219,23 +225,6 @@ class VmView extends JView{
 			$this->assignRef('lang',$lang);
 		}
 
-		//I absolutly do not understand for that should be for, note by Max
-/*		if ($object) {
-		   if(Vmconfig::get('multix','none')!=='none'){
-				$this->loadHelper('permissions');
-				if(!Permissions::getInstance()->check('admin')) {
-					if (!$object->virtuemart_vendor_id) {
-						if(!class_exists('VirtueMartModelVendor')) require(JPATH_VM_ADMINISTRATOR.DS.'models'.DS.'vendor.php');
-						$object->virtuemart_vendor_id = VirtueMartModelVendor::getLoggedVendor();
-					}
-					$vendorList = '<input type="hidden" name="virtuemart_vendor_id" value="'.$object->virtuemart_vendor_id.'" />';
-				} else 	$vendorList= ShopFunctions::renderVendorList($object->virtuemart_vendor_id,false);
-		   } else {
-				$vendorList = '<input type="hidden" name="virtuemart_vendor_id" value="1" />';
-		   }
-		   $this->assignRef('vendorList', $vendorList);
-		}*/
-
 	}
 
 
@@ -246,14 +235,17 @@ class VmView extends JView{
 		if ($msg) {
 			$msg = ' <span style="color: #666666; font-size: large;">' . $msg . '</span>';
 		}
-		//$text = strtoupper('COM_VIRTUEMART_'.$name );
-		$viewText = JText::_('COM_VIRTUEMART_' . $name);
+
+		$viewText = JText::_('COM_VIRTUEMART_' . strtoupper($name));
 		if (!$task = JRequest::getWord('task'))
 		$task = 'list';
 
 		$taskName = ' <small><small>[ ' . JText::_('COM_VIRTUEMART_' . $task) . ' ]</small></small>';
 		JToolBarHelper::title($viewText . ' ' . $taskName . $msg, 'head vm_' . $view . '_48');
 		$this->assignRef('viewName',$viewText); //was $viewName?
+		$app = JFactory::getApplication();
+		$doc = JFactory::getDocument();
+		$doc->setTitle($app->getCfg('sitename'). ' - ' .JText::_('JADMINISTRATION').' - '.strip_tags($msg));
 	}
 
 	function sort($orderby ,$name=null ){
@@ -277,7 +269,7 @@ class VmView extends JView{
 		'. JHTML::_( 'form.token' );
 	}
 
-	function getToolbar() {
+	static function getToolbar() {
 
 		// add required stylesheets from admin template
 		$document    = JFactory::getDocument();
@@ -291,8 +283,7 @@ class VmView extends JView{
 			'<![endif]-->'."\n".
 			'<!--[if gte IE 8]>'."\n\n".
 			'<link href="administrator/templates/bluestork/css/ie8.css" rel="stylesheet" type="text/css" />'."\n".
-			'<![endif]-->'."\n".
-			'<link rel="stylesheet" href="administrator/templates/bluestork/css/rounded.css" type="text/css" />'."\n"
+			'<![endif]-->'."\n"
 			);
 		//load the JToolBar library and create a toolbar
 		jimport('joomla.html.toolbar');
@@ -336,6 +327,29 @@ class VmView extends JView{
 			return ('<a href="javascript:void(0);" onclick="return listItemTask(\'cb'. $i .'\',\''. $task .'\')" title="'. $action .'">'
 				.'<img src="images/'. $img .'" border="0" alt="'. $alt .'" /></a>');
 		}
+
+	}
+	function showhelp(){
+		/* http://docs.joomla.org/Help_system/Adding_a_help_button_to_the_toolbar */
+
+			$task=JRequest::getWord('task', '');
+			$view=JRequest::getWord('view', '');
+			if ($task) {
+				if ($task=="add") {
+					$task="edit";
+				}
+				$task ="_".$task;
+			}
+			if (!class_exists( 'VmConfig' )) require(JPATH_COMPONENT_ADMINISTRATOR.DS.'helpers'.DS.'config.php');
+			VmConfig::loadConfig();
+			VmConfig::loadJLang('com_virtuemart_help');
+ 		    $lang = JFactory::getLanguage();
+ 	        $key=  'COM_VIRTUEMART_HELP_'.$view.$task;
+	         if ($lang->hasKey($key)) {
+					$help_url  = JTEXT::_($key)."?tmpl=component";
+ 		            $bar = JToolBar::getInstance('toolbar');
+					$bar->appendButton( 'Popup', 'help', 'JTOOLBAR_HELP', $help_url, 960, 500 );
+	        }
 
 	}
 

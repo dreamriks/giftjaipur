@@ -17,28 +17,36 @@
  * @version $Id: default_addtocart.php 6433 2012-09-12 15:08:50Z openglobal $
  */
 // Check to ensure this file is included in Joomla!
-defined ('_JEXEC') or die('Restricted access');
+defined('_JEXEC') or die('Restricted access');
+if (isset($this->product->step_order_level))
+	$step=$this->product->step_order_level;
+else
+	$step=1;
+if($step==0)
+	$step=1;
+$alert=JText::sprintf ('COM_VIRTUEMART_WRONG_AMOUNT_ADDED', $step);
 ?>
+
 <div class="addtocart-area">
 
 	<form method="post" class="product js-recalculate" action="<?php echo JRoute::_ ('index.php'); ?>">
+                <input name="quantity" type="hidden" value="<?php echo $step ?>" />
 		<?php // Product custom_fields
 		if (!empty($this->product->customfieldsCart)) {
 			?>
 			<div class="product-fields">
 				<?php foreach ($this->product->customfieldsCart as $field) { ?>
 				<div class="product-field product-field-type-<?php echo $field->field_type ?>">
-					<span class="product-fields-title-wrapper"><span class="product-fields-title"><strong><?php echo JText::_ ($field->custom_title) ?></strong></span>
-					<?php if ($field->custom_tip) {
-					echo JHTML::tooltip ($field->custom_tip, JText::_ ($field->custom_title), 'tooltip.png');
-				} ?></span>
+					<?php if ($field->show_title) { ?>
+						<span class="product-fields-title-wrapper"><span class="product-fields-title"><strong><?php echo JText::_ ($field->custom_title) ?></strong></span>
+					<?php }
+					if ($field->custom_tip) {
+						echo JHTML::tooltip ($field->custom_tip, JText::_ ($field->custom_title), 'tooltip.png');
+					} ?></span>
 					<span class="product-field-display"><?php echo $field->display ?></span>
-
 					<span class="product-field-desc"><?php echo $field->custom_field_desc ?></span>
 				</div><br/>
-				<?php
-			}
-				?>
+				<?php } ?>
 			</div>
 			<?php
 		}
@@ -59,12 +67,26 @@ defined ('_JEXEC') or die('Restricted access');
 				</div><br/>
 				<?php } ?>
 			</div>
-			<?php }
+		<?php }
 
-		if (!VmConfig::get('use_as_catalog', 0) and !empty($this->product->prices['salesPrice'])) {
+		if (!VmConfig::get('use_as_catalog', 0)  ) {
 		?>
 
 		<div class="addtocart-bar">
+
+<script type="text/javascript">
+		function check(obj) {
+ 		// use the modulus operator '%' to see if there is a remainder
+		remainder=obj.value % <?php echo $step?>;
+		quantity=obj.value;
+ 		if (remainder  != 0) {
+ 			alert('<?php echo $alert?>!');
+ 			obj.value = quantity-remainder;
+ 			return false;
+ 			}
+ 		return true;
+ 		}
+</script> 
 
 			<?php // Display the quantity box
 
@@ -76,9 +98,11 @@ defined ('_JEXEC') or die('Restricted access');
 				<?php } else { ?>
 				<!-- <label for="quantity<?php echo $this->product->virtuemart_product_id; ?>" class="quantity_box"><?php echo JText::_ ('COM_VIRTUEMART_CART_QUANTITY'); ?>: </label> -->
 				<span class="quantity-box">
-		<input type="text" class="quantity-input js-recalculate" name="quantity[]" value="<?php if (isset($this->product->min_order_level) && (int)$this->product->min_order_level > 0) {
+		<input type="text" class="quantity-input js-recalculate" name="quantity[]" onblur="check(this);" value="<?php if (isset($this->product->step_order_level) && (int)$this->product->step_order_level > 0) {
+			echo $this->product->step_order_level;
+		} else if(!empty($this->product->min_order_level)){
 			echo $this->product->min_order_level;
-		} else {
+		}else {
 			echo '1';
 		} ?>"/>
 	    </span>
@@ -100,7 +124,7 @@ defined ('_JEXEC') or die('Restricted access');
 		</div>
 		<?php }
 		 // Display the add to cart button END  ?>
-		<input type="hidden" class="pname" value="<?php echo htmlentities($this->product->product_name) ?>"/>
+		<input type="hidden" class="pname" value="<?php echo htmlentities($this->product->product_name, ENT_QUOTES, 'utf-8') ?>"/>
 		<input type="hidden" name="option" value="com_virtuemart"/>
 		<input type="hidden" name="view" value="cart"/>
 		<noscript><input type="hidden" name="task" value="add"/></noscript>

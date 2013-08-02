@@ -1,11 +1,11 @@
 <?php
 /**
 *
-* Handle the waitinglist
+* Handle the Product Custom Fields
 *
 * @package	VirtueMart
 * @subpackage Product
-* @author RolandD
+* @author RolandD, Patrick khol, Valérie Isaksen
 * @link http://www.virtuemart.net
 * @copyright Copyright (c) 2004 - 2010 VirtueMart Team. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
@@ -13,8 +13,9 @@
 * to the GNU General Public License, and as distributed it includes or
 * is derivative of works licensed under the GNU General Public License or
 * other free or open source software licenses.
-* @version $Id: product_edit_waitinglist.php 2978 2011-04-06 14:21:19Z alatak $
+* @version $Id$
 */
+
 
 // Check to ensure this file is included in Joomla!
 defined('_JEXEC') or die('Restricted access');
@@ -35,7 +36,7 @@ if (isset($this->product->customfields_fromParent)) { ?>
 					if ($customfield->is_cart_attribute) $cartIcone=  'default';
 					else  $cartIcone= 'default-off';
 					if ($customfield->field_type == 'Z') {
-
+						// R: related categories
 						$tables['categories'] .=  '
 							<div class="vm_thumb_image">
 								<span>'.$customfield->display.'</span>'.
@@ -44,7 +45,7 @@ if (isset($this->product->customfields_fromParent)) { ?>
 							</div>';
 
 					} elseif ($customfield->field_type == 'R') {
-
+					// R: related products
 						$tables['products'] .=  '
 							<div class="vm_thumb_image">
 								<span>'.$customfield->display.'</span>'.
@@ -66,6 +67,7 @@ if (isset($this->product->customfields_fromParent)) { ?>
 							<span class="vmicon vmicon-16-'.$cartIcone.'"></span>
 							</td>
 							<td><span class="vmicon vmicon-16-remove"></span><input class="ordering" type="hidden" value="'.$customfield->ordering.'" name="field['.$i .'][ordering]" /></td>
+							<td ><span class="vmicon vmicon-16-move"></span></td>
 						 </tr>';
 						/*$tables['fields'] .= '
 							<tr class="removable">
@@ -87,6 +89,7 @@ if (isset($this->product->customfields_fromParent)) { ?>
 							<span class="vmicon vmicon-16-'.$cartIcone.'"></span>
 							</td>
 							<td><span class="vmicon vmicon-16-remove"></span><input class="ordering" type="hidden" value="'.$customfield->ordering.'" name="field['.$i .'][ordering]" /></td>
+							<td ><span class="vmicon vmicon-16-move"></span></td>
 						 </tr>';
 						}
 
@@ -96,7 +99,7 @@ if (isset($this->product->customfields_fromParent)) { ?>
 
 			 $emptyTable = '
 				<tr>
-					<td colspan="7">'.JText::_( 'COM_VIRTUEMART_CUSTOM_NO_TYPES').'</td>
+					<td colspan="8">'.JText::_( 'COM_VIRTUEMART_CUSTOM_NO_TYPES').'</td>
 				<tr>';
 			?>
 			<fieldset style="background-color:#F9F9F9;">
@@ -132,6 +135,8 @@ if (isset($this->product->customfields_fromParent)) { ?>
 						<th><?php echo JText::_('COM_VIRTUEMART_TYPE');?></th>
 						<th><?php echo JText::_('COM_VIRTUEMART_CUSTOM_IS_CART_ATTRIBUTE');?></th>
 						<th><?php echo JText::_('COM_VIRTUEMART_DELETE'); ?></th>
+						<th><?php echo JText::_('COM_VIRTUEMART_MOVE'); ?></th>
+
 					</tr>
 					</thead>
 					<tbody id="custom_field">
@@ -159,7 +164,7 @@ if (isset($this->product->customfields_fromParent)) { ?>
 	nextCustom = <?php echo $i ?>;
 
 	jQuery(document).ready(function(){
-		jQuery('#custom_field').sortable();
+		jQuery('#custom_field').sortable({handle: ".vmicon-16-move"});
 		// Need to declare the update routine outside the sortable() function so
 		// that it can be called when adding new customfields
 		jQuery('#custom_field').bind('sortupdate', function(event, ui) {
@@ -172,7 +177,7 @@ if (isset($this->product->customfields_fromParent)) { ?>
 	});
 	jQuery('select#customlist').chosen().change(function() {
 		selected = jQuery(this).find( 'option:selected').val() ;
-		jQuery.getJSON('index.php?option=com_virtuemart&view=product&task=getData&format=json&type=fields&id='+selected+'&row='+nextCustom+'&virtuemart_product_id=<?php echo $this->product->virtuemart_product_id; ?>',
+		jQuery.getJSON('<?php echo JURI::root(false) ?>administrator/index.php?option=com_virtuemart&view=product&task=getData&format=json&type=fields&id='+selected+'&row='+nextCustom+'&virtuemart_product_id=<?php echo $this->product->virtuemart_product_id; ?>',
 		function(data) {
 			jQuery.each(data.value, function(index, value){
 				jQuery("#custom_field").append(value);
@@ -184,24 +189,24 @@ if (isset($this->product->customfields_fromParent)) { ?>
 
 		jQuery('input#relatedproductsSearch').autocomplete({
 
-		source: 'index.php?option=com_virtuemart&view=product&task=getData&format=json&type=relatedproducts&row='+nextCustom,
+		source: '<?php echo JURI::root(false) ?>administrator/index.php?option=com_virtuemart&view=product&task=getData&format=json&type=relatedproducts&row='+nextCustom,
 		select: function(event, ui){
 			jQuery("#custom_products").append(ui.item.label);
 			nextCustom++;
-			jQuery(this).autocomplete( "option" , 'source' , 'index.php?option=com_virtuemart&view=product&task=getData&format=json&type=relatedproducts&row='+nextCustom )
-			jQuery('input#relatedproductsSearch').autocomplete( "option" , 'source' , 'index.php?option=com_virtuemart&view=product&task=getData&format=json&type=relatedproducts&row='+nextCustom )
+			jQuery(this).autocomplete( "option" , 'source' , '<?php echo JURI::root(false) ?>administrator/index.php?option=com_virtuemart&view=product&task=getData&format=json&type=relatedproducts&row='+nextCustom )
+			jQuery('input#relatedproductsSearch').autocomplete( "option" , 'source' , '<?php echo JURI::root(false) ?>administrator/index.php?option=com_virtuemart&view=product&task=getData&format=json&type=relatedproducts&row='+nextCustom )
 		},
 		minLength:1,
 		html: true
 	});
 	jQuery('input#relatedcategoriesSearch').autocomplete({
 
-		source: 'index.php?option=com_virtuemart&view=product&task=getData&format=json&type=relatedcategories&row='+nextCustom,
+		source: '<?php echo JURI::root(false) ?>administrator/index.php?option=com_virtuemart&view=product&task=getData&format=json&type=relatedcategories&row='+nextCustom,
 		select: function(event, ui){
 			jQuery("#custom_categories").append(ui.item.label);
 			nextCustom++;
-			jQuery(this).autocomplete( "option" , 'source' , 'index.php?option=com_virtuemart&view=product&task=getData&format=json&type=relatedcategories&row='+nextCustom )
-			jQuery('input#relatedcategoriesSearch').autocomplete( "option" , 'source' , 'index.php?option=com_virtuemart&view=product&task=getData&format=json&type=relatedcategories&row='+nextCustom )
+			jQuery(this).autocomplete( "option" , 'source' , '<?php echo JURI::root(false) ?>administrator/index.php?option=com_virtuemart&view=product&task=getData&format=json&type=relatedcategories&row='+nextCustom )
+			jQuery('input#relatedcategoriesSearch').autocomplete( "option" , 'source' , '<?php echo JURI::root(false) ?>administrator/index.php?option=com_virtuemart&view=product&task=getData&format=json&type=relatedcategories&row='+nextCustom )
 		},
 		minLength:1,
 		html: true

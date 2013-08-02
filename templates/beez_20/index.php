@@ -60,8 +60,25 @@ $doc->addScript($this->baseurl.'/templates/'.$this->template.'/javascript/hide.j
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php echo $this->language; ?>" lang="<?php echo $this->language; ?>" dir="<?php echo $this->direction; ?>" >
 <head>
-<jdoc:include type="head" />
+<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Tangerine">
+<script type="text/javascript">
 
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-18137357-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+
+<jdoc:include type="head" />
+<?php include("canonical_tag.php") ?>
 <!--[if lte IE 6]>
 <link href="<?php echo $this->baseurl ?>/templates/<?php echo $this->template; ?>/css/ieonly.css" rel="stylesheet" type="text/css" />
 <?php if ($color=="personal") : ?>
@@ -108,7 +125,18 @@ $doc->addScript($this->baseurl.'/templates/'.$this->template.'/javascript/hide.j
 
 <div id="all">
         <div id="back">
+          <div id="custom_top_bar" style="height:32px;width:100%;background-color:rgb(45, 89, 184);color:white">
+           &nbsp&nbsp <a href="http://www.facebook.com/giftjaipur"><img src="images/topbar/facebook.png" style="float:left;;padding-left:4px;padding-top:2px;"></a> &nbsp&nbsp
+            <a href="https://twitter.com/Gift_Jaipur
+"><img src="images/topbar/twitter.png" style="float:left;padding-left:8px;padding-top:2px;"></a>
+            <a href="http://namangarg88.blogspot.in/"><img src="images/topbar/blogger.png" style="float:left;padding-left:8px;padding-top:2px;"></a>
+           
+            <img src="images/topbar/free-delivery.png" style="float:left;margin-left:360px;"> 
+            <img src="images/topbar/credit-debit-card.png" style="float:left;">
+            <img src="images/topbar/contact.png" style="float:left;"><span style="float:left;margin-top:5px;">+91 9654 66 3355</span>
+          </div>
                 <div id="header">
+               
                                 <div class="logoheader">
                                         <h1 id="logo">
                                         
@@ -135,12 +163,14 @@ $doc->addScript($this->baseurl.'/templates/'.$this->template.'/javascript/hide.j
                                         <h3 class="unseen"><?php echo JText::_('TPL_BEEZ2_NAVIGATION'); ?></h3>
                                           
                                         <jdoc:include type="modules" name="position-1" />
-                                        <div id="line">
-                                       <!-- <div id="fontsize"></div>-->
-                                        <h3 class="unseen"><?php echo JText::_('TPL_BEEZ2_SEARCH'); ?></h3>
-                                        <jdoc:include type="modules" name="position-0" />
-                                          
-                                        </div> <!-- end line -->
+                                        
+                                        
+                                        
+                                        
+                                         <!-- end line -->
+
+
+
 
 
                         </div><!-- end header -->
@@ -157,6 +187,13 @@ $doc->addScript($this->baseurl.'/templates/'.$this->template.'/javascript/hide.j
                                                         <div class="left1 <?php if ($showRightColumn==NULL){ echo 'leftbigger';} ?>" id="nav">
                                                    <jdoc:include type="modules" name="position-7" style="beezDivision" headerLevel="3" />
                                                                 <jdoc:include type="modules" name="position-4" style="beezHide" headerLevel="3" state="0 " />
+                                                  <?php 
+													$my_parameter=JRequest::getVar('view');
+													if ($my_parameter=="cart"){?>
+                                                    <img src=/images/cart/ebs1.png><br />
+<img src=/images/cart/read_customer_reviews.png><br>
+<img src=/images/cart/callusnow.png>
+																                                                  <?php }?>
                                                                 <jdoc:include type="modules" name="position-5" style="beezTabs" headerLevel="2"  id="3" />
 
 
@@ -174,10 +211,10 @@ $doc->addScript($this->baseurl.'/templates/'.$this->template.'/javascript/hide.j
 
                                                        <jdoc:include type="message" />
                                                        <jdoc:include type="component" />
-<div id="bottom11">
-                                        <div class="box10 box11"> <jdoc:include type="modules" name="position-21" style="beezDivision" headerlevel="3" /></div>
-                                        <div class="box10 box21"> <jdoc:include type="modules" name="position-22" style="beezDivision" headerlevel="3" /></div>
-                                                </div><!-- end main -->
+
+                                        <div class="box10 box11"> <jdoc:include type="modules" name="position-21"/></div>
+                                        <div class="box10 box21"> <jdoc:include type="modules" name="position-22"/></div>
+                                                <!-- end main -->
 
                                         </div><!-- end wrapper -->
 

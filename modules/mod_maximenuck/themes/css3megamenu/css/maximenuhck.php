@@ -20,7 +20,7 @@ $id = htmlspecialchars ( $_GET['monid'] , ENT_QUOTES );
 /* menu */
 div#<?php echo $id; ?> {
 	font-size:14px; 
-	line-height:21px;
+	line-height:112px;
 	text-align:left;
 }
 
@@ -39,18 +39,9 @@ div#<?php echo $id; ?> ul.maximenuck {
     /*-moz-border-radius: 10px;*/
     /*-webkit-border-radius: 10px;*/
     /*border-radius: 10px;*/
-    background: #014464;
-    background: -moz-linear-gradient(top,  #6f5093 0%, #013953 100%);
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#0272a7), color-stop(100%,#013953));
-    background: -webkit-linear-gradient(top,  #6f5093 0%,#013953 100%);
-    background: -o-linear-gradient(top,  #6f5093 0%,#013953 100%);
-    background: -ms-linear-gradient(top,  #6f5093 0%,#013953 100%);
-    background: linear-gradient(top,  #6f5093 0%,#013953 100%);
-    border: 1px solid #705093;
-    -moz-box-shadow:inset 0px 0px 1px #edf9ff;
-    -webkit-box-shadow:inset 0px 0px 1px #edf9ff;
-    box-shadow:inset 0px 0px 1px #edf9ff;
+   
     text-align: left;
+    height:112px;
 }
 
 /*---------------------------------------------
@@ -60,35 +51,36 @@ div#<?php echo $id; ?> ul.maximenuck {
 div#<?php echo $id; ?> ul.maximenuck li.maximenuck.level1 {
     background : none;
     list-style : none;
-    border: 1px solid transparent;
-    /*float:left;*/
+      /*float:left;*/
     text-align:center;
-    padding: 4px 9px 2px 9px;
+    padding: 4px 15px 2px 15px;
     margin-right: 30px;
     margin-top: 2px;
     cursor: pointer;
     vertical-align: middle;
+    -moz-box-shadow:-5px 0px 10px -7px;
+    -webkit-box-shadow:-5px 0px 10px -7px;
+    -ms-box-shadow:-5px 0px 10px -7px;    
+    box-shadow: -5px 0px 10px -7px;
 }
 
 div#<?php echo $id; ?> ul.maximenuck li.maximenuck.level1:hover,
 div#<?php echo $id; ?> ul.maximenuck li.maximenuck.level1.active {
-	border: 1px solid #777777;
-	background: #F4F4F4;
-	background: -moz-linear-gradient(top, #F4F4F4, #EEEEEE);
-	background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#F4F4F4), to(#EEEEEE));
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
-	border-radius: 5px;
+	
+	background: none;
+	
 }
 
 div#<?php echo $id; ?> ul.maximenuck li.maximenuck.level1 > a,
 div#<?php echo $id; ?> ul.maximenuck li.maximenuck.level1 > span.separator {
-	font-size:14px; 
-	color: #EEEEEE;
+	font-size:13px; 
+	font-weight:bold;
+	color:rgb(143,141,141);
 	display:block;
 	text-decoration:none;
-	text-shadow: 1px 1px 1px #000;
+	text-shadow:none;/* 1px 1px 1px #000;*/
 	min-height : 34px;
+	min-width:114px;
     outline : none;
     background : none;
     border : none;
@@ -116,13 +108,13 @@ div#<?php echo $id; ?> ul.maximenuck li.maximenuck.level1.active > span.separato
 /* arrow image for parent item */
 div#<?php echo $id; ?> ul.maximenuck li.level1.parent > a,
 div#<?php echo $id; ?> ul.maximenuck li.level1.parent > span.separator {
-	padding-right:21px;
-	background:url("../images/drop.gif") no-repeat right 8px !important;
+	padding-right:0px;
+	background:none;
 }
 
 div#<?php echo $id; ?> ul.maximenuck li.level1.parent:hover > a,
 div#<?php echo $id; ?> ul.maximenuck li.level1.parent:hover > span.separator {
-	background:url("../images/drop.gif") no-repeat right 8px !important;
+	background:none;
 }
 
 /* arrow image for submenu parent item */
@@ -231,7 +223,8 @@ div#<?php echo $id; ?> ul.maximenuck li.maximenuck ul.maximenuck2 li a {
 }
 
 div#<?php echo $id; ?> ul.maximenuck li.maximenuck ul.maximenuck2 a {
-	font-size:12px;
+	font-weight:bold;
+    font-size:13px;
 	color:#161616;
 	display: block;
 }
@@ -258,8 +251,8 @@ div#<?php echo $id; ?> ul.maximenuck li.maximenuck img {
 
 /* item title */
 div#<?php echo $id; ?> span.titreck {
-    /*text-transform : none;
-    font-weight : normal;
+    text-transform : uppercase;
+    /*font-weight : normal;
     font-size : 14px;
     line-height : 18px;*/
     text-decoration : none;
@@ -278,6 +271,8 @@ div#<?php echo $id; ?> span.descck {
     line-height : 12px;
     float : none !important;
     float : left;
+    margin-left:-16px;
+    
 }
 
 /* submenus container */
@@ -313,6 +308,7 @@ div#<?php echo $id; ?> ul.maximenuck li div.floatck div.maximenuck2 {
     width : 180px; /* default width */
 	margin: 0;
 	padding: 0;
+	line-height:32px;
 }
 
 

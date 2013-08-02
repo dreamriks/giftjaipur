@@ -50,11 +50,15 @@ JHTML::_ ( 'behavior.modal' );
     if (JPluginHelper::isEnabled('authentication', 'openid')) {
         $lang = JFactory::getLanguage();
         $lang->load('plg_authentication_openid', JPATH_ADMINISTRATOR);
-        $langScript = 'var JLanguage = {};' .
+        $langScript = '
+//<![CDATA[
+'.'var JLanguage = {};' .
                 ' JLanguage.WHAT_IS_OPENID = \'' . JText::_('WHAT_IS_OPENID') . '\';' .
                 ' JLanguage.LOGIN_WITH_OPENID = \'' . JText::_('LOGIN_WITH_OPENID') . '\';' .
                 ' JLanguage.NORMAL_LOGIN = \'' . JText::_('NORMAL_LOGIN') . '\';' .
-                ' var comlogin = 1;';
+                ' var comlogin = 1;
+//]]>
+                ';
         $document = JFactory::getDocument();
         $document->addScriptDeclaration($langScript);
         JHTML::_('script', 'openid.js');
@@ -84,7 +88,7 @@ JHTML::_ ( 'behavior.modal' );
 
 	    <h1><?php echo JText::_('COM_VIRTUEMART_ORDER_ANONYMOUS') ?></h1>
 
-	    <form action="<?php echo JRoute::_( 'index.php', true, 0); ?>" method="post" name="com-login" >
+	    <form action="<?php echo JRoute::_( 'index.php', 1, $this->useSSL); ?>" method="post" name="com-login" >
 
 	    	<div class="width30 floatleft" id="com-form-order-number">
 	    		<label for="order_number"><?php echo JText::_('COM_VIRTUEMART_ORDER_NUMBER') ?></label><br />
@@ -111,7 +115,7 @@ JHTML::_ ( 'behavior.modal' );
 
 
     // XXX style CSS id com-form-login ?>
-    <form id="com-form-login" action="<?php echo JRoute::_('index.php'); ?>" method="post" name="com-login" >
+    <form id="com-form-login" action="<?php echo JRoute::_('index.php', $this->useXHTML, $this->useSSL); ?>" method="post" name="com-login" >
     <fieldset class="userdata">
 	<?php if (!$this->from_cart ) { ?>
 	<div>

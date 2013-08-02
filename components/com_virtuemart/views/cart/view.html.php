@@ -36,17 +36,20 @@ class VirtueMartViewCart extends VmView {
 		$mainframe = JFactory::getApplication();
 		$pathway = $mainframe->getPathway();
 		$document = JFactory::getDocument();
+		$document->setMetaData('robots','NOINDEX, NOFOLLOW, NOARCHIVE, NOSNIPPET');
+
+		// add javascript for price and cart, need even for quantity buttons, so we need it almost anywhere
+		//vmJsApi::jPrice();
 
 		$layoutName = $this->getLayout();
-		if (!$layoutName)
-		$layoutName = JRequest::getWord('layout', 'default');
+		if (!$layoutName) $layoutName = JRequest::getWord('layout', 'default');
 		$this->assignRef('layoutName', $layoutName);
 		$format = JRequest::getWord('format');
 
 		if (!class_exists('VirtueMartCart'))
 		require(JPATH_VM_SITE . DS . 'helpers' . DS . 'cart.php');
 		$cart = VirtueMartCart::getCart();
-		$cart->getCartPrices();
+		//$cart->getCartPrices();
 		$this->assignRef('cart', $cart);
 
 		//Why is this here, when we have view.raw.php
@@ -67,31 +70,32 @@ class VirtueMartViewCart extends VmView {
 
 		} else */
 		if ($layoutName == 'select_shipment') {
+			$cart->prepareCartViewData();
 			if (!class_exists('vmPSPlugin')) require(JPATH_VM_PLUGINS . DS . 'vmpsplugin.php');
 			JPluginHelper::importPlugin('vmshipment');
 			$this->lSelectShipment();
 
-			$pathway->addItem(JText::_('COM_VIRTUEMART_CART_OVERVIEW'), JRoute::_('index.php?option=com_virtuemart&view=cart'));
+			$pathway->addItem(JText::_('COM_VIRTUEMART_CART_OVERVIEW'), JRoute::_('index.php?option=com_virtuemart&view=cart', FALSE));
 			$pathway->addItem(JText::_('COM_VIRTUEMART_CART_SELECTSHIPMENT'));
 			$document->setTitle(JText::_('COM_VIRTUEMART_CART_SELECTSHIPMENT'));
 		} else if ($layoutName == 'select_payment') {
 
 			/* Load the cart helper */
 			//			$cartModel = VmModel::getModel('cart');
-
+			$cart->prepareCartViewData();
 			$this->lSelectPayment();
 
-			$pathway->addItem(JText::_('COM_VIRTUEMART_CART_OVERVIEW'), JRoute::_('index.php?option=com_virtuemart&view=cart'));
+			$pathway->addItem(JText::_('COM_VIRTUEMART_CART_OVERVIEW'), JRoute::_('index.php?option=com_virtuemart&view=cart', FALSE));
 			$pathway->addItem(JText::_('COM_VIRTUEMART_CART_SELECTPAYMENT'));
 			$document->setTitle(JText::_('COM_VIRTUEMART_CART_SELECTPAYMENT'));
 		} else if ($layoutName == 'order_done') {
-
+			VmConfig::loadJLang('com_virtuemart_shoppers');
 			$this->lOrderDone();
 
 			$pathway->addItem(JText::_('COM_VIRTUEMART_CART_THANKYOU'));
 			$document->setTitle(JText::_('COM_VIRTUEMART_CART_THANKYOU'));
 		} else if ($layoutName == 'default') {
-
+			VmConfig::loadJLang('com_virtuemart_shoppers');
 			$cart->prepareCartViewData();
 
 			$cart->prepareAddressRadioSelection();
@@ -102,10 +106,10 @@ class VirtueMartViewCart extends VmView {
 			$currencyDisplay = CurrencyDisplay::getInstance($this->cart->pricesCurrency);
 			$this->assignRef('currencyDisplay',$currencyDisplay);
 
-			$totalInPaymentCurrency =$this->getTotalInPaymentCurrency();
+			$totalInPaymentCurrency = $this->getTotalInPaymentCurrency();
 
 			$checkoutAdvertise =$this->getCheckoutAdvertise();
-			if ($cart && !VmConfig::get('use_as_catalog', 0)) {
+			if (!$cart->_redirect and !VmConfig::get('use_as_catalog', 0)) {
 				$cart->checkout(false);
 			}
 
@@ -143,6 +147,11 @@ class VirtueMartViewCart extends VmView {
 				$checkout_link_html = '';
 			}
 			$this->assignRef('checkout_link_html', $checkout_link_html);
+
+			//set order language
+			$lang = JFactory::getLanguage();
+			$order_language = $lang->getTag();
+			$this->assignRef('order_language',$order_language);
 		}
 		//dump ($cart,'cart');
 		$useSSL = VmConfig::get('useSSL', 0);
@@ -154,6 +163,8 @@ class VirtueMartViewCart extends VmView {
 		// @max: quicknirty
 		$cart->setCartIntoSession();
 		shopFunctionsF::setVmTemplate($this, 0, 0, $layoutName);
+
+
 
 // 		vmdebug('my cart ',$cart);
 		parent::display($tpl);
@@ -168,7 +179,7 @@ class VirtueMartViewCart extends VmView {
 		if ($virtuemart_category_id) {
 			$categoryLink = '&virtuemart_category_id=' . $virtuemart_category_id;
 		}
-		$continue_link = JRoute::_('index.php?option=com_virtuemart&view=category' . $categoryLink);
+		$continue_link = JRoute::_('index.php?option=com_virtuemart&view=category' . $categoryLink, FALSE);
 
 		$continue_link_html = '<a class="continue_link" href="' . $continue_link . '" ><span>' . JText::_('COM_VIRTUEMART_CONTINUE_SHOPPING') . '</span></a>';
 		$this->assignRef('continue_link_html', $continue_link_html);

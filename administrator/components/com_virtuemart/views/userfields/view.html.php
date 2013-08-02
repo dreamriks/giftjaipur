@@ -34,13 +34,15 @@ class VirtuemartViewUserfields extends VmView {
 
 	function display($tpl = null) {
 
+		VmConfig::loadJLang('com_virtuemart_shoppers',TRUE);
 		$option = JRequest::getCmd( 'option');
 		$mainframe = JFactory::getApplication() ;
 
 		// Load the helper(s)
 
 
-		$this->loadHelper('html');
+		if (!class_exists('VmHTML'))
+			require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'html.php');
 
 		$layoutName = JRequest::getWord('layout', 'default');
 		$model = VmModel::getModel();
@@ -130,7 +132,7 @@ class VirtuemartViewUserfields extends VmView {
 					$lists['userfield_values'] .=
 						 '<tr>'
 						 .'<td><input type="text" value="'.$userFieldValues[$i]->fieldvalue.'" name="vValues['.$i.']" /></td>'
-						.'<td><input type="text" size="50" value="'.$userFieldValues[$i]->fieldtitle.'" name="vNames['.$i.']"   />'.$translate.'</td>'
+						.'<td><input type="text" size="50" value="'.$userFieldValues[$i]->fieldtitle.'" name="vNames['.$i.']"   />'.$translate.'<input type="button" class="button deleteRow" value=" - " /></td>'
 						.'</tr>';
 				}
 			}
@@ -139,7 +141,7 @@ class VirtuemartViewUserfields extends VmView {
 // 			vmdebug('$userField->shipment',$userField);
 			// Toggles
 			$lists['required']     =  VmHTML::row('booleanlist','COM_VIRTUEMART_FIELDMANAGER_REQUIRED','required',$userField->required,$notoggle);
-			$lists['published']    =  VmHTML::row('booleanlist','COM_VIRTUEMART_PUBLISH','published',$userField->published,$notoggle);
+			$lists['published']    =  VmHTML::row('booleanlist','COM_VIRTUEMART_PUBLISHED','published',$userField->published,$notoggle);
 			$lists['registration'] =  VmHTML::row('booleanlist','COM_VIRTUEMART_FIELDMANAGER_SHOW_ON_REGISTRATION','registration',$userField->registration,$notoggle);
 			$lists['shipment']     =  VmHTML::row('booleanlist','COM_VIRTUEMART_FIELDMANAGER_SHOW_ON_SHIPPING','shipment',$userField->shipment,$notoggle);
 			$lists['account']      =  VmHTML::row('booleanlist','COM_VIRTUEMART_FIELDMANAGER_SHOW_ON_ACCOUNT','account',$userField->account,$notoggle);
@@ -309,7 +311,8 @@ class VirtuemartViewUserfields extends VmView {
 		$db ->setQuery($q);
 		$this->plugin = $db ->loadObject();
 		
-		$this->loadHelper('parameterparser');
+		if (!class_exists('vmParameters'))
+				require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'parameterparser.php');
 		$parameters = new vmParameters($params,  $this->plugin->element , 'plugin' ,'vmuserfield');
 		$lang = JFactory::getLanguage();
 		$filename = 'plg_vmuserfield_' .  $this->plugin->element;

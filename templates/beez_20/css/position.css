@@ -199,11 +199,12 @@ h1#logo
   
         display:block;
         /*padding:20px 20px 20px 10px;*/
-        width:230px;
+        width:190px;
         /*padding-top:0.6em;*/
         font-weight:normal;
         line-height:1em;
         font-size:3em;
+		left:25px
 }
 
 #logo img

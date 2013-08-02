@@ -108,6 +108,7 @@ class VirtueMartModelUser extends VmModel {
 		if($this->_id!=$id){
 			$this->_id = (int)$id;
 			$this->_data = null;
+			$this->customer_number = 0;
 		}
 		// 		}
 	}
@@ -201,9 +202,11 @@ class VirtueMartModelUser extends VmModel {
 		if($this->_data->user_is_vendor){
 
 			$vendorModel = VmModel::getModel('vendor');
-			if(Vmconfig::get('multix','none')==='none'){
+			if(Vmconfig::get('multix','none')=='none'){
 				$this->_data->virtuemart_vendor_id = 1;
+				vmdebug('user model, single vendor',$this->_data->virtuemart_vendor_id);
 			}
+
 			$vendorModel->setId($this->_data->virtuemart_vendor_id);
 			$this->_data->vendor = $vendorModel->getVendor();
 		}
@@ -473,14 +476,17 @@ class VirtueMartModelUser extends VmModel {
 	 * @author Oscar van Eijk
 	 * @return boolean True is the save was successful, false otherwise.
 	 */
-	public function store(&$data){
+	public function store(&$data,$checkToken = TRUE){
 
 		$message = '';
 		$user = '';
 		$newId = 0;
 
-		JRequest::checkToken() or jexit( 'Invalid Token, while trying to save user' );
-		$mainframe = JFactory::getApplication() ;
+		if($checkToken){
+			JRequest::checkToken() or jexit( 'Invalid Token, while trying to save user' );
+			$mainframe = JFactory::getApplication() ;
+		}
+
 
 		if(empty($data)){
 			vmError('Developer notice, no data to store for user');
@@ -623,6 +629,7 @@ class VirtueMartModelUser extends VmModel {
 				jimport('joomla.user.helper');
 				$user->set('activation', JUtility::getHash( JUserHelper::genRandomPassword()) );
 				$user->set('block', '1');
+				//$user->set('lastvisitDate', '0000-00-00 00:00:00');
 			}
 		}
 
@@ -635,13 +642,12 @@ class VirtueMartModelUser extends VmModel {
 			}
 		}
 
-
-
 		// Save the JUser object
 		if (!$user->save()) {
 			vmError(JText::_( $user->getError()) , JText::_( $user->getError()));
 			return false;
 		}
+		//vmdebug('my user, why logged in? ',$user);
 
 		$newId = $user->get('id');
 		$data['virtuemart_user_id'] = $newId;	//We need this in that case, because data is bound to table later
@@ -666,7 +672,7 @@ class VirtueMartModelUser extends VmModel {
 
 
 		if((int)$data['user_is_vendor']==1){
-			// 			vmdebug('vendor recognised');
+			vmdebug('vendor recognised '.$data['virtuemart_vendor_id']);
 			if($this ->storeVendorData($data)){
 				if ($new) {
 					if ($doUserActivation ) {
@@ -721,7 +727,6 @@ class VirtueMartModelUser extends VmModel {
 		$data['user_is_vendor'] = $alreadyStoredUserData->user_is_vendor;
 		$data['virtuemart_vendor_id'] = $alreadyStoredUserData->virtuemart_vendor_id;
 
-		vmdebug('saveUserData',$data);
 		unset($data['customer_number']);
 		if(empty($alreadyStoredUserData->customer_number)){
 			//if(!class_exists('vmUserPlugin')) require(JPATH_VM_SITE.DS.'helpers'.DS.'vmuserplugin.php');
@@ -814,8 +819,9 @@ class VirtueMartModelUser extends VmModel {
 
 			//TODO Attention this is set now to virtuemart_vendor_id=1, because using a vendor with different id then 1 is not completly supported and can lead to bugs
 			//So we disable the possibility to store vendors not with virtuemart_vendor_id = 1
-			if(Vmconfig::get('multix','none')==='none' ){
+			if(Vmconfig::get('multix','none')=='none' ){
 				$data['virtuemart_vendor_id'] = 1;
+				vmdebug('no multivendor, set virtuemart_vendor_id = 1');
 			}
 			$vendorModel->setId($data['virtuemart_vendor_id']);
 
@@ -867,8 +873,15 @@ class VirtueMartModelUser extends VmModel {
 				}
 			} else {
 
+				if(!class_exists('Permissions')) require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'permissions.php');
+				//Todo multi-x, also vendors should be allowed to change the user address.
+				if(!Permissions::getInstance()->check('admin')){
+					$userId = $user->id;
+				} else {
+					$userId = (int)$data['virtuemart_user_id'];
+				}
 				$q = 'SELECT `virtuemart_userinfo_id` FROM #__virtuemart_userinfos
-				WHERE `virtuemart_user_id` = '.$user->id.'
+				WHERE `virtuemart_user_id` = '.$userId.'
 				AND `address_type` = "BT"';
 
 				$this->_db->setQuery($q);
@@ -1054,7 +1067,7 @@ class VirtueMartModelUser extends VmModel {
 				unset($data[$fldName]);
 				if($userinfo!==0){
 					if(property_exists($userinfo,$fldName)){
-						vmdebug('property_exists userinfo->$fldName '.$fldName,$userinfo);
+						//vmdebug('property_exists userinfo->$fldName '.$fldName,$userinfo);
 						$data[$fldName] = $userinfo->$fldName;
 					} else {
 						vmError('Your tables seem to be broken, you have fields in your form which have no corresponding field in the db');
@@ -1349,19 +1362,63 @@ class VirtueMartModelUser extends VmModel {
 
 		//$select = ' * ';
 		//$joinedTables = ' FROM #__users AS ju LEFT JOIN #__virtuemart_vmusers AS vmu ON ju.id = vmu.virtuemart_user_id';
-		$select = ' DISTINCT ju.id AS id
+		$search = JRequest::getString('search', false);
+		$tableToUse = JRequest::getString('searchTable','juser');
+
+		$where = '';
+		if ($search) {
+			$where = ' WHERE ';
+
+			$searchArray = array('ju.name','username','email','perms','usertype','shopper_group_name');
+			if($tableToUse!='juser'){
+
+				if(!class_exists('TableUserinfos'))require(JPATH_VM_ADMINISTRATOR.DS.'tables'.DS.'userinfos.php');
+				$db = JFactory::getDbo();
+				$userfieldTable = new TableUserinfos($db);
+				$userfieldFields = get_object_vars($userfieldTable);
+				$userFieldSearchArray = array('company','first_name','last_name');
+				//We must validate if the userfields actually exists, they could be removed
+				$userFieldsValid = array();
+				foreach($userFieldSearchArray as $ufield){
+					if(key_exists($ufield,$userfieldFields)){
+						$userFieldsValid[] = $ufield;
+					}
+				}
+				$searchArray = array_merge($userFieldsValid,$searchArray);
+			}
+
+			$search = str_replace(' ','%',$this->_db->getEscaped( $search, true ));
+			foreach($searchArray as $field){
+
+					$where.= ' '.$field.' LIKE "%'.$search.'%" OR ';
+			}
+			$where = substr($where,0,-3);
+		}
+
+		$select = ' ju.id AS id
 			, ju.name AS name
 			, ju.username AS username
 			, ju.email AS email
-			, ju.usertype AS usertype
 			, IFNULL(vmu.user_is_vendor,"0") AS is_vendor
 			, IFNULL(sg.shopper_group_name, "") AS shopper_group_name ';
+		if ($search) {
+			if($tableToUse!='juser'){
+				$select .= ' , ui.name as uiname ';
+			}
+
+			foreach($searchArray as $ufield){
+				$select .= ' , '.$ufield;
+			}
+		}
 		$joinedTables = ' FROM #__users AS ju
 			LEFT JOIN #__virtuemart_vmusers AS vmu ON ju.id = vmu.virtuemart_user_id
 			LEFT JOIN #__virtuemart_vmuser_shoppergroups AS vx ON ju.id = vx.virtuemart_user_id
 			LEFT JOIN #__virtuemart_shoppergroups AS sg ON vx.virtuemart_shoppergroup_id = sg.virtuemart_shoppergroup_id ';
+		if ($search and $tableToUse!='juser') {
+			$joinedTables .= ' LEFT JOIN #__virtuemart_userinfos AS ui ON ui.virtuemart_user_id = vmu.virtuemart_user_id';
+		}
 
-		return $this->_data = $this->exeSortSearchListQuery(0,$select,$joinedTables,$this->_getFilter(),' GROUP BY ju.id',$this->_getOrdering());
+		return $this->_data = $this->exeSortSearchListQuery(0,$select,$joinedTables,$where,' GROUP BY ju.id',$this->_getOrdering());
 
 	}
 
@@ -1373,11 +1430,17 @@ class VirtueMartModelUser extends VmModel {
 	 */
 	function _getFilter()
 	{
-		if ($search = JRequest::getWord('search', false)) {
+		if ($search = JRequest::getString('search', false)) {
 			$search = '"%' . $this->_db->getEscaped( $search, true ) . '%"' ;
 			//$search = $this->_db->Quote($search, false);
+			$searchArray = array('name','username','email','perms','usertype','shopper_group_name');
 
-			$where = ' WHERE `name` LIKE '.$search.' OR `username` LIKE ' .$search.' OR `email` LIKE ' .$search.' OR `perms` LIKE ' .$search.' OR `usertype` LIKE ' .$search.' OR `shopper_group_name` LIKE ' .$search;
+			$where = ' WHERE ';
+			foreach($searchArray as $field){
+				$where.= ' `'.$field.'` LIKE '.$search.' OR ';
+			}
+			$where = substr($where,0,-3);
+			//$where = ' WHERE `name` LIKE '.$search.' OR `username` LIKE ' .$search.' OR `email` LIKE ' .$search.' OR `perms` LIKE ' .$search.' OR `usertype` LIKE ' .$search.' OR `shopper_group_name` LIKE ' .$search;
 			return ($where);
 		}
 		return ('');
@@ -1414,17 +1477,22 @@ class VirtueMartModelUser extends VmModel {
 	 * @param int $_id User ID
 	 * @return string Customer Number
 	 */
-	function getCustomerNumberById($_id = 0)
+	private $customer_number = 0;
+	public function getCustomerNumberById()
 	{
-		$_q = "SELECT `customer_number` FROM `#__virtuemart_vmusers` "
-		."WHERE `virtuemart_user_id`='" . (($_id==0)?$this->_id:(int)$_id) . "' ";
-		$_r = $this->_getList($_q);
-		if(!empty($_r[0])){
-			return $_r[0]->customer_number;
-		}else {
-			return false;
+		if($this->customer_number===0){
+			$_q = "SELECT `customer_number` FROM `#__virtuemart_vmusers` "
+				."WHERE `virtuemart_user_id`='" . $this->_id . "' ";
+			$_r = $this->_getList($_q);
+
+			if(!empty($_r[0])){
+				$this->customer_number = $_r[0]->customer_number;
+			}else {
+				$this->customer_number = false;
+			}
 		}
 
+		return $this->customer_number;
 	}
 
 	/**

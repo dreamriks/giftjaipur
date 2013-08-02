@@ -57,9 +57,6 @@ if (is_file (VMKLARNA_CONFIG_FILE)) {
 
 class plgVmPaymentKlarna extends vmPSPlugin {
 
-	// instance of class
-	public static $_this = FALSE;
-
 	function __construct (& $subject, $config) {
 
 		parent::__construct ($subject, $config);
@@ -831,7 +828,9 @@ class plgVmPaymentKlarna extends vmPSPlugin {
 	 * @param $render
 	 */
 	function plgVmOnSelfCallFE ($type, $name, &$render) {
-
+		if ($name != $this->_name || $type != 'vmpayment') {
+            return FALSE;
+        }
 		//Klarna Ajax
 		require (JPATH_VMKLARNAPLUGIN . '/klarna/helpers/klarna_ajax.php');
 
@@ -887,7 +886,9 @@ class plgVmPaymentKlarna extends vmPSPlugin {
 	 * @param $render
 	 */
 	function plgVmOnSelfCallBE ($type, $name, &$render) {
-
+		if ($name != $this->_name || $type != 'vmpayment') {
+            return FALSE;
+        }
 		// fetches PClasses From XML file
 		$call = jrequest::getWord ('call');
 		$this->$call();
